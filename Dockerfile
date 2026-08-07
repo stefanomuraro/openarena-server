@@ -43,8 +43,8 @@ RUN mv /opt/openarena/oa_ded.aarch64 /opt/openarena/oa_ded.arm \
 RUN mkdir -p /tmp/defaults
 COPY config/ /tmp/defaults
 
-COPY docker-entrypoint.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+COPY entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/entrypoint.sh
 
 VOLUME ["/data"]
 
@@ -54,4 +54,4 @@ EXPOSE 27960/udp
 HEALTHCHECK --timeout=5s --start-period=10s \
   CMD sh -c 'printf "\377\377\377\377getstatus\n" | nc -u -q 1 127.0.0.1 27960 | grep -a -q statusResponse'
 
-ENTRYPOINT ["docker-entrypoint.sh"]
+ENTRYPOINT ["entrypoint.sh"]
