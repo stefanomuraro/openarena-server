@@ -1,0 +1,10 @@
+services:
+  openarena:
+    build: .
+    container_name: openarena
+    restart: unless-stopped
+    ports:
+      - "27950:27950/udp"
+      - "27960:27960/udp"
+    volumes:
+      - ./data:/data
