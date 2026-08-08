@@ -1,7 +1,6 @@
 services:
-  openarena:
+  openarena-server:
     build: .
-    container_name: openarena
     restart: unless-stopped
     ports:
       - "27950:27950/udp"
