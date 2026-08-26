@@ -1,6 +1,8 @@
 # Build stage
 FROM debian:trixie-slim AS builder
 
+ARG TARGETARCH
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     make \
@@ -16,10 +18,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 RUN git clone https://github.com/OpenArena/engine.git \
-    && sed -i 's/arm/aarch64/g' engine/code/qcommon/q_platform.h \
     && make -j$(nproc) -C engine \
+    && if [ "$TARGETARCH" = "arm64" ]; then ARCH_DIR="aarch64"; else ARCH_DIR="x86_64"; fi \
     && mkdir -p /opt/openarena \
-    && cp -r engine/build/release-linux-aarch64/* /opt/openarena \
+    && cp -r engine/build/release-linux-${ARCH_DIR}/* /opt/openarena \
     && rm -rf engine
 
 RUN wget -O openarena.zip --progress=dot:giga "https://sourceforge.net/projects/oarena/files/openarena-0.8.8.zip/download" \
@@ -37,7 +39,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 COPY --from=builder /opt/openarena /opt/openarena
 
-RUN mv /opt/openarena/oa_ded.aarch64 /opt/openarena/oa_ded.arm \
+ARG TARGETARCH
+RUN if [ "$TARGETARCH" = "arm64" ]; then BIN_ARCH="aarch64"; else BIN_ARCH="x86_64"; fi \
+    && mv /opt/openarena/oa_ded.${BIN_ARCH} /opt/openarena/oa_ded.arm \
     && chmod +x /opt/openarena/oa_ded.arm
 
 RUN mkdir -p /tmp/defaults
