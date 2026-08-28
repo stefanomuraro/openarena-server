@@ -35,7 +35,15 @@ FROM debian:trixie-slim AS runtime
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     netcat-traditional \
+    gosu \
     && rm -rf /var/lib/apt/lists/*
+
+ENV UID=1000 \
+    GID=1000 \
+    SKIP_CHOWN_DATA=false
+
+RUN useradd -r -d /home/openarena -s /bin/bash openarena \
+    && mkdir -p /home/openarena
 
 COPY --from=builder /opt/openarena /opt/openarena
 
@@ -51,6 +59,8 @@ COPY entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
 VOLUME ["/data"]
+
+RUN chown -R openarena:openarena /opt/openarena /tmp/defaults /home/openarena
 
 EXPOSE 27950/udp
 EXPOSE 27960/udp

@@ -28,6 +28,16 @@ services:
       - ./data:/data
 ```
 
+## Environment Variables
+
+| Variable | Default | Description |
+| --- | --- | --- |
+| `UID` | `1000` | User ID the server process runs as. Matched to the host user so bind-mounted `/data` is writable. |
+| `GID` | `1000` | Group ID the server process runs as. |
+| `SKIP_CHOWN_DATA` | `false` | Set to `true` to skip changing ownership of `/data` on startup. |
+
+The container starts as root to remap the `openarena` user to the requested `UID`/`GID` and fix bind-mount ownership, then runs the game server as the non-root `openarena` user.
+
 ## Persistent Data
 
 Mount a volume at `/data` to persist config and maps.
