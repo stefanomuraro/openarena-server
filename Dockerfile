@@ -1,6 +1,8 @@
 # Build stage
 FROM debian:trixie-slim AS builder
 
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
 ARG TARGETARCH
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -23,7 +25,7 @@ RUN case "$TARGETARCH" in \
       *) echo "Unsupported architecture: $TARGETARCH (expected amd64 or arm64)" >&2; exit 1 ;; \
     esac \
     && git clone https://github.com/OpenArena/engine.git \
-    && make -j$(nproc) -C engine \
+    && make -j"$(nproc)" -C engine \
     && mkdir -p /opt/openarena \
     && cp -r engine/build/release-linux-${ARCH_DIR}/* /opt/openarena \
     && rm -rf engine
@@ -82,6 +84,6 @@ EXPOSE 27950/udp
 EXPOSE 27960/udp
 
 HEALTHCHECK --timeout=5s --start-period=10s \
-  CMD sh -c 'printf "\377\377\377\377getstatus\n" | nc -u -q 1 127.0.0.1 27960 | grep -a -q statusResponse'
+  CMD ["sh", "-c", "printf \"\\377\\377\\377\\377getstatus\\n\" | nc -u -q 1 127.0.0.1 27960 | grep -a -q statusResponse"]
 
-ENTRYPOINT ["entrypoint.sh"]
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

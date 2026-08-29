@@ -1,0 +1,6 @@
+---
+ignored:
+  # DL3008: don't pin apt package versions. The base is a stable Debian
+  # release (trixie-slim); pinning would break every time the distro repo
+  # updates and require constant maintenance with no benefit here.
+  - DL3008
