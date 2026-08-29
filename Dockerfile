@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1
+
 # Build stage
 FROM debian:trixie-slim AS builder
 
@@ -24,10 +26,11 @@ RUN case "$TARGETARCH" in \
       arm64) ARCH_DIR="aarch64" ;; \
       *) echo "Unsupported architecture: $TARGETARCH (expected amd64 or arm64)" >&2; exit 1 ;; \
     esac \
-    && git clone https://github.com/OpenArena/engine.git \
+    && git clone --depth 1 https://github.com/OpenArena/engine.git \
     && make -j"$(nproc)" -C engine \
     && mkdir -p /opt/openarena \
     && cp -r engine/build/release-linux-${ARCH_DIR}/* /opt/openarena \
+    && mv /opt/openarena/oa_ded.${ARCH_DIR} /opt/openarena/oa_ded.arm \
     && rm -rf engine
 
 RUN for url in \
@@ -46,8 +49,6 @@ RUN for url in \
 # Runtime stage
 FROM debian:trixie-slim AS runtime
 
-ARG TARGETARCH
-
 RUN apt-get update && apt-get install -y --no-install-recommends \
     netcat-traditional \
     gosu \
@@ -63,19 +64,9 @@ RUN useradd -r -d /home/openarena -s /bin/bash openarena \
 
 COPY --from=builder --chown=openarena:openarena /opt/openarena /opt/openarena
 
-RUN case "$TARGETARCH" in \
-      amd64) BIN_ARCH="x86_64" ;; \
-      arm64) BIN_ARCH="aarch64" ;; \
-      *) echo "Unsupported architecture: $TARGETARCH (expected amd64 or arm64)" >&2; exit 1 ;; \
-    esac \
-    && mv /opt/openarena/oa_ded.${BIN_ARCH} /opt/openarena/oa_ded.arm \
-    && chmod +x /opt/openarena/oa_ded.arm
-
-RUN mkdir -p /tmp/defaults
 COPY --chown=openarena:openarena config/ /tmp/defaults
 
-COPY entrypoint.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/entrypoint.sh
+COPY --chmod=+x entrypoint.sh /usr/local/bin/entrypoint.sh
 
 VOLUME ["/data"]
 
