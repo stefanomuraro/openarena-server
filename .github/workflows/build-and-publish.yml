@@ -4,6 +4,14 @@ name: Build and Push to DockerHub
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - "**/*.md"
+      - ".editorconfig"
+      - ".gitignore"
+      - ".hadolint.yaml"
+      - ".yamllint"
+      - ".githooks/**"
+      - "compose.yml"
 
 jobs:
   build-and-push:

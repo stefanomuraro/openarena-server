@@ -52,7 +52,7 @@ Mount a volume at `/data` to persist config and maps.
 └── server.log            # Server log file
 ```
 
-## Architectures
+## Supported Platforms
 - `linux/amd64`
 - `linux/arm64`
 
