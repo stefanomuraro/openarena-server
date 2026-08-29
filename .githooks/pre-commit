@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -e
+
+hadolint --config .hadolint.yaml Dockerfile
+shellcheck entrypoint.sh
+shfmt -i 2 -d entrypoint.sh
+yamllint compose.yml .github/workflows/*.yml
