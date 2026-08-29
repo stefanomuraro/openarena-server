@@ -58,9 +58,10 @@ ENV UID=1000 \
     SKIP_CHOWN_DATA=false
 
 RUN useradd -r -d /home/openarena -s /bin/bash openarena \
-    && mkdir -p /home/openarena
+    && mkdir -p /home/openarena \
+    && chown openarena:openarena /home/openarena
 
-COPY --from=builder /opt/openarena /opt/openarena
+COPY --from=builder --chown=openarena:openarena /opt/openarena /opt/openarena
 
 RUN case "$TARGETARCH" in \
       amd64) BIN_ARCH="x86_64" ;; \
@@ -71,14 +72,12 @@ RUN case "$TARGETARCH" in \
     && chmod +x /opt/openarena/oa_ded.arm
 
 RUN mkdir -p /tmp/defaults
-COPY config/ /tmp/defaults
+COPY --chown=openarena:openarena config/ /tmp/defaults
 
 COPY entrypoint.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
 VOLUME ["/data"]
-
-RUN chown -R openarena:openarena /opt/openarena /tmp/defaults /home/openarena
 
 EXPOSE 27950/udp
 EXPOSE 27960/udp
