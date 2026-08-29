@@ -17,9 +17,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     unzip \
     && rm -rf /var/lib/apt/lists/*
 
-RUN git clone https://github.com/OpenArena/engine.git \
+RUN case "$TARGETARCH" in \
+      amd64) ARCH_DIR="x86_64" ;; \
+      arm64) ARCH_DIR="aarch64" ;; \
+      *) echo "Unsupported architecture: $TARGETARCH (expected amd64 or arm64)" >&2; exit 1 ;; \
+    esac \
+    && git clone https://github.com/OpenArena/engine.git \
     && make -j$(nproc) -C engine \
-    && if [ "$TARGETARCH" = "arm64" ]; then ARCH_DIR="aarch64"; else ARCH_DIR="x86_64"; fi \
     && mkdir -p /opt/openarena \
     && cp -r engine/build/release-linux-${ARCH_DIR}/* /opt/openarena \
     && rm -rf engine
@@ -32,6 +36,8 @@ RUN wget -O openarena.zip --progress=dot:giga "https://sourceforge.net/projects/
 
 # Runtime stage
 FROM debian:trixie-slim AS runtime
+
+ARG TARGETARCH
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     netcat-traditional \
@@ -47,8 +53,11 @@ RUN useradd -r -d /home/openarena -s /bin/bash openarena \
 
 COPY --from=builder /opt/openarena /opt/openarena
 
-ARG TARGETARCH
-RUN if [ "$TARGETARCH" = "arm64" ]; then BIN_ARCH="aarch64"; else BIN_ARCH="x86_64"; fi \
+RUN case "$TARGETARCH" in \
+      amd64) BIN_ARCH="x86_64" ;; \
+      arm64) BIN_ARCH="aarch64" ;; \
+      *) echo "Unsupported architecture: $TARGETARCH (expected amd64 or arm64)" >&2; exit 1 ;; \
+    esac \
     && mv /opt/openarena/oa_ded.${BIN_ARCH} /opt/openarena/oa_ded.arm \
     && chmod +x /opt/openarena/oa_ded.arm
 

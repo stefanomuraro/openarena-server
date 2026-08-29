@@ -58,6 +58,8 @@ Mount a volume at `/data` to persist config and maps.
 
 ## Building Locally
 
+Requires Docker with the buildx plugin, so that `TARGETARCH` is set and the architecture mapping in the Dockerfile resolves correctly.
+
 ```bash
 docker compose up -d
 ```
