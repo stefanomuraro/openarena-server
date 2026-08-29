@@ -28,7 +28,14 @@ RUN case "$TARGETARCH" in \
     && cp -r engine/build/release-linux-${ARCH_DIR}/* /opt/openarena \
     && rm -rf engine
 
-RUN wget -O openarena.zip --progress=dot:giga "https://sourceforge.net/projects/oarena/files/openarena-0.8.8.zip/download" \
+RUN for url in \
+      "https://archive.org/download/openarena-0.8.8/openarena-0.8.8.zip" \
+      "https://sourceforge.net/projects/oarena/files/openarena-0.8.8.zip/download"; do \
+        echo "==> Trying $url"; \
+        wget --tries=3 --timeout=30 --waitretry=2 --continue --progress=dot:giga -O openarena.zip "$url" \
+          && echo "37ab41990b37459822ce8c2fe590607616e1f6d1  openarena.zip" | sha1sum -c - \
+          && break; \
+      done \
     && unzip openarena.zip \
     && mkdir -p /opt/openarena/baseoa \
     && cp -r openarena-0.8.8/baseoa/* /opt/openarena/baseoa \
