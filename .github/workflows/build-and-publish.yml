@@ -35,7 +35,7 @@ jobs:
       - name: ShellCheck
         uses: docker://koalaman/shellcheck-alpine:stable
         with:
-          args: entrypoint.sh
+          args: shellcheck entrypoint.sh
 
       - name: Check shell formatting
         uses: docker://mvdan/shfmt:v3
