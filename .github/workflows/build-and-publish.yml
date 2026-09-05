@@ -5,15 +5,38 @@ on:
   push:
     branches: [main]
     paths-ignore:
+      # These don't affect the image or the linters, so skip the workflow.
       - "**/*.md"
       - ".editorconfig"
       - ".gitignore"
-      - ".hadolint.yaml"
-      - ".yamllint"
-      - ".githooks/**"
       - "compose.yml"
 
 jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Lint Dockerfile
+        uses: hadolint/hadolint-action@v3
+        with:
+          config: .hadolint.yaml
+
+      - name: ShellCheck
+        uses: docker://koalaman/shellcheck-alpine:stable
+        with:
+          args: entrypoint.sh
+
+      - name: Check shell formatting
+        uses: docker://mvdan/shfmt:v3
+        with:
+          args: -i 2 -d entrypoint.sh
+
+      - name: Lint YAML
+        uses: docker://cytopia/yamllint:latest
+        with:
+          args: compose.yml .github/workflows
+
   build-and-push:
     runs-on: ubuntu-latest
     steps:
