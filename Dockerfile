@@ -26,7 +26,10 @@ RUN case "$TARGETARCH" in \
       arm64) ARCH_DIR="aarch64" ;; \
       *) echo "Unsupported architecture: $TARGETARCH (expected amd64 or arm64)" >&2; exit 1 ;; \
     esac \
-    && git clone --depth 1 https://github.com/OpenArena/engine.git \
+    && git init engine \
+    && git -C engine remote add origin https://github.com/OpenArena/engine.git \
+    && git -C engine fetch --depth 1 origin 95c63426c896b2f6277ee940f053a649dd97364a \
+    && git -C engine checkout --detach FETCH_HEAD \
     && make -j"$(nproc)" -C engine \
     && mkdir -p /opt/openarena \
     && cp -r engine/build/release-linux-${ARCH_DIR}/* /opt/openarena \
