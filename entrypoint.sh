@@ -34,10 +34,19 @@ mkdir -p "/home/openarena/.openarena/baseoa/$log_dir"
 rm -f "/home/openarena/.openarena/baseoa/$log"
 ln -sfn "/data/$log" "/home/openarena/.openarena/baseoa/$log"
 
+case "${SKIP_CHOWN_DATA,,}" in
+true) skip_chown=true ;;
+false) skip_chown=false ;;
+*)
+  echo "error: SKIP_CHOWN_DATA must be true or false (got '$SKIP_CHOWN_DATA')" >&2
+  exit 1
+  ;;
+esac
+
 if [ "$(id -u)" = 0 ]; then
   chown -R openarena:openarena /home/openarena/.openarena
 
-  if [ "${SKIP_CHOWN_DATA^^}" != "TRUE" ] && [ "$(stat -c %u /data)" != "$UID" ]; then
+  if [ "$skip_chown" = false ] && [ "$(stat -c %u /data)" != "$UID" ]; then
     chown -R openarena:openarena /data
   fi
 fi
