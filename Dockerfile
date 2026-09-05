@@ -6,6 +6,7 @@ FROM debian:trixie-slim AS builder
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 ARG TARGETARCH
+ARG DL_TIMEOUT=120
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
@@ -36,14 +37,24 @@ RUN case "$TARGETARCH" in \
     && mv /opt/openarena/oa_ded.${ARCH_DIR} /opt/openarena/oa_ded.arm \
     && rm -rf engine
 
-RUN for url in \
-      "https://archive.org/download/openarena-0.8.8/openarena-0.8.8.zip" \
-      "https://sourceforge.net/projects/oarena/files/openarena-0.8.8.zip/download"; do \
-        echo "==> Trying $url"; \
-        wget --tries=3 --timeout=30 --waitretry=2 --continue --progress=dot:giga -O openarena.zip "$url" \
+RUN ok=0; \
+    urls="https://archive.org/download/openarena-0.8.8/openarena-0.8.8.zip https://sourceforge.net/projects/oarena/files/openarena-0.8.8.zip/download"; \
+    for url in $urls; do \
+      echo "==> Trying $url"; \
+      timeout "$DL_TIMEOUT" wget --tries=3 --timeout=30 --waitretry=2 --progress=dot:giga -O openarena.zip "$url" \
+        && echo "37ab41990b37459822ce8c2fe590607616e1f6d1  openarena.zip" | sha1sum -c - \
+        && { ok=1; break; }; \
+    done; \
+    if [ "$ok" != 1 ]; then \
+      echo "==> Initial mirror attempts failed; retrying without an overall time limit"; \
+      for url in $urls; do \
+        echo "==> Trying $url (no overall limit)"; \
+        wget --tries=3 --timeout=30 --waitretry=2 --progress=dot:giga -O openarena.zip "$url" \
           && echo "37ab41990b37459822ce8c2fe590607616e1f6d1  openarena.zip" | sha1sum -c - \
-          && break; \
-      done \
+          && { ok=1; break; }; \
+      done; \
+      [ "$ok" = 1 ]; \
+    fi \
     && unzip openarena.zip \
     && mkdir -p /opt/openarena/baseoa \
     && cp -r openarena-0.8.8/baseoa/* /opt/openarena/baseoa \
