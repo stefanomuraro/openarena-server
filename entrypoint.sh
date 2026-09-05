@@ -6,6 +6,7 @@ shopt -s nullglob
 : "${UID:=1000}"
 : "${GID:=1000}"
 : "${SKIP_CHOWN_DATA:=false}"
+: "${PUBLIC:=false}"
 
 mkdir -p /data/config /data/maps
 
@@ -41,7 +42,16 @@ if [ "$(id -u)" = 0 ]; then
   fi
 fi
 
+case "${PUBLIC,,}" in
+true) dedicated=2 ;;
+false) dedicated=1 ;;
+*)
+  echo "error: PUBLIC must be true or false (got '$PUBLIC')" >&2
+  exit 1
+  ;;
+esac
+
 exec gosu openarena:openarena \
   /opt/openarena/oa_ded.arm \
-  +set dedicated 2 \
+  +set dedicated "$dedicated" \
   +exec server.cfg

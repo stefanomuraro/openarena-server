@@ -35,6 +35,7 @@ services:
 | `UID` | `1000` | User ID the server process runs as. Matched to the host user so bind-mounted `/data` is writable. |
 | `GID` | `1000` | Group ID the server process runs as. |
 | `SKIP_CHOWN_DATA` | `false` | Set to `true` to skip changing ownership of `/data` on startup. |
+| `PUBLIC` | `false` | When `true`, the server runs with `dedicated 2` and is broadcast to the master server (public). When `false`, it runs with `dedicated 1` (LAN/friends only, connect via your direct address). Set `PUBLIC=true` to expose the server publicly. |
 
 The container starts as root to remap the `openarena` user to the requested `UID`/`GID` and fix bind-mount ownership, then runs the game server as the non-root `openarena` user.
 

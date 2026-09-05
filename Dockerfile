@@ -70,7 +70,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 ENV UID=1000 \
     GID=1000 \
-    SKIP_CHOWN_DATA=false
+    SKIP_CHOWN_DATA=false \
+    PUBLIC=false
 
 RUN useradd -r -d /home/openarena -s /bin/bash openarena \
     && mkdir -p /home/openarena \
