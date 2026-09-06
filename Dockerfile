@@ -38,7 +38,9 @@ RUN case "$TARGETARCH" in \
     && rm -rf engine
 
 RUN ok=0; \
-    urls="https://archive.org/download/openarena-0.8.8/openarena-0.8.8.zip https://sourceforge.net/projects/oarena/files/openarena-0.8.8.zip/download"; \
+    urls="https://archive.org/download/openarena-0.8.8/openarena-0.8.8.zip \
+          https://sourceforge.net/projects/oarena/files/openarena-0.8.8.zip/download \
+          http://download.tuxfamily.org/openarena/rel/088/openarena-0.8.8.zip"; \
     for url in $urls; do \
       echo "==> Trying $url"; \
       timeout "$DL_TIMEOUT" wget --tries=3 --timeout=30 --waitretry=2 --progress=dot:giga -O openarena.zip "$url" \
