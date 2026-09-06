@@ -6,7 +6,7 @@ FROM debian:trixie-slim AS builder
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 ARG TARGETARCH
-ARG DL_TIMEOUT=120
+ARG DL_TIMEOUT=180
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
@@ -38,8 +38,8 @@ RUN case "$TARGETARCH" in \
     && rm -rf engine
 
 RUN ok=0; \
-    urls="https://archive.org/download/openarena-0.8.8/openarena-0.8.8.zip \
-          https://sourceforge.net/projects/oarena/files/openarena-0.8.8.zip/download \
+    urls="https://sourceforge.net/projects/oarena/files/openarena-0.8.8.zip/download \
+          https://archive.org/download/openarena-0.8.8/openarena-0.8.8.zip \
           http://download.tuxfamily.org/openarena/rel/088/openarena-0.8.8.zip"; \
     for url in $urls; do \
       echo "==> Trying $url"; \
